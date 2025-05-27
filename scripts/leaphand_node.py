@@ -35,14 +35,9 @@ class LeapNode(Node):
         assert input_format in ['leap', 'allegro', 'ones'], "Input format must be one of 'leap', 'allegro', or 'ones'."
         assert side in ['left', 'right'], "Side must be either 'left' or 'right'."
         
-
         # Subscribes to a variety of sources that can command the hand
-        if input_format == 'leap':
-            self.create_subscription(JointState, 'cmd_leap', self._receive_pose, 10)
-        elif input_format == 'allegro':
-            self.create_subscription(JointState, 'cmd_allegro', self._receive_allegro, 10)
-        elif input_format == 'ones':
-            self.create_subscription(JointState, 'cmd_ones', self._receive_ones, 10)
+        self.input_format = input_format
+        self.create_subscription(JointState, 'joints_target', self._receive_pose, 10)
 
         # Creates services that can give information about the hand out
         self.create_service(LeapVelocity, 'leap_velocity', self.vel_srv)
@@ -50,6 +45,7 @@ class LeapNode(Node):
         self.create_service(LeapPosVelEff, 'leap_pos_vel_eff', self.pos_vel_eff_srv)
         self.create_service(LeapPosVelEff, 'leap_pos_vel', self.pos_vel_srv)
         self._motors = list(map(int, ids.split(',')))
+        self._motors.sort()
         self._dxl_client = DynamixelClient(self._motors, port, 4000000)
         self._dxl_client.connect()
 
@@ -68,25 +64,22 @@ class LeapNode(Node):
 
         self._lock_client = threading.Lock()
         self._pub_joints = self.create_publisher(JointState, 'joint_states', 10)
-        self.create_timer(0.1, self._pos_timer_callback)
+        # self.create_timer(0.1, self._pos_timer_callback)
 
-    # Receive LEAP pose and directly control the robot.  Fully open here is 180 and increases in this value closes the hand.
     def _receive_pose(self, msg):
-        pose = np.array(msg.position)
-        with self._lock_client:
-            self._dxl_client.write_desired_pos(self._motors, pose)
-
-    # Allegro compatibility, first read the allegro publisher and then convert to leap
-    # It adds 180 to the input to make the fully open position at 0 instead of 180.
-    def _receive_allegro(self, msg):
-        pose = np.array(lhu.allegro_to_LEAPhand(msg.position, zeros=False))
-        with self._lock_client:
-            self._dxl_client.write_desired_pos(self._motors, pose)
-
-    # Sim compatibility, first read the sim publisher and then convert to leap
-    # Sim compatibility for policies, it assumes the ranges are [-1,1] and then convert to leap hand ranges.
-    def _receive_ones(self, msg):
-        pose = lhu.sim_ones_to_LEAPhand(np.array(msg.position))
+        pose = np.zeros(16)
+        for name, position in zip(msg.name, msg.position):
+            if name.startswith('joint_'):
+                index = int(name.rsplit('_')[1])
+                pose[index] = position
+        if self.input_format == 'allegro':
+            # Allegro compatibility, first read the allegro publisher and then convert to leap
+            # It adds 180 to the input to make the fully open position at 0 instead of 180.
+            pose = lhu.LEAPhand_to_allegro(pose, zeros=False)
+        elif self.input_format == 'ones':
+            # Sim compatibility, first read the sim publisher and then convert to leap
+            # Sim compatibility for policies, it assumes the ranges are [-1,1] and then convert to leap hand ranges.
+            pose = lhu.LEAPhand_to_sim_ones(pose)
         with self._lock_client:
             self._dxl_client.write_desired_pos(self._motors, pose)
 

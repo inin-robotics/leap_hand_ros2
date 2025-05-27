@@ -16,6 +16,7 @@ def generate_launch_description():
     left_ids_name = "left_ids"
     right_port_name = "right_port"
     right_ids_name = "right_ids"
+    default_id_str = ",".join(str(i) for i in range(16))
     left_port_arg = DeclareLaunchArgument(
         left_port_name,
         default_value="/dev/leap_left_hand",
@@ -23,7 +24,7 @@ def generate_launch_description():
     )
     left_ids_arg = DeclareLaunchArgument(
         left_ids_name,
-        default_value="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15",
+        default_value=default_id_str,
         description="Motor IDs for the left leaphand_node",
     )
     right_port_arg = DeclareLaunchArgument(
@@ -33,7 +34,7 @@ def generate_launch_description():
     )
     right_ids_arg = DeclareLaunchArgument(
         right_ids_name,
-        default_value="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15",
+        default_value=default_id_str,
         description="Motor IDs for the right leaphand_node",
     )
 

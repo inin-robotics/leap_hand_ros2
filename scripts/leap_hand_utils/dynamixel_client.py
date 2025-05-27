@@ -141,6 +141,7 @@ class DynamixelClient:
         )
         self._sync_writers = {}
         self._offsets = {}
+        self._db_signs = [1.0] * 16
 
         self.OPEN_CLIENTS.add(self)
 
@@ -356,11 +357,15 @@ class DynamixelClient:
         for motor_id, pos in zip(motor_ids, curr_pos):
             offset = ((pos + np.pi) // (2 * np.pi)) * 2 * np.pi
             if motor_id == 13:
+                # thumb root ready state
                 if side:
                     offset -= np.pi / 2
                 else:
                     offset += np.pi / 2
             self._offsets[motor_id] = offset
+        if side == 1:
+            for idx in [1, 5, 9]:
+                self._db_signs[idx] = -1.0
         
     def remove_offsets(self, motor_ids, positions):
         """Remove the offsets of the raw positions."""
@@ -373,7 +378,8 @@ class DynamixelClient:
         """Add the offsets of the raw positions."""
         for motor_id, pos in zip(motor_ids, positions):
             if motor_id in self._offsets:
-                positions[motor_id] = pos + self._offsets[motor_id]
+                # positions[motor_id] = pos + self._offsets[motor_id]
+                positions[motor_id] = self._db_signs[motor_id] * pos + self._offsets[motor_id]
         return positions
 
     def __enter__(self):

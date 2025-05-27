@@ -32,7 +32,6 @@ ament_package()
 # Install Python scripts
 install(PROGRAMS
   scripts/leaphand_node.py
-  scripts/ros2_example.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

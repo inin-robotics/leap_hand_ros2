@@ -9,9 +9,10 @@ def generate_launch_description():
         default_value='/dev/leap_left_hand',
         description='Serial port for leaphand_node'
     )
+    default_id_str = ",".join(str(i) for i in range(16))
     ids_arg = DeclareLaunchArgument(
         'ids',
-        default_value='0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15',
+        default_value=default_id_str,
         description='Motor IDs for leaphand_node'
     )
     side_arg = DeclareLaunchArgument(
@@ -25,6 +26,7 @@ def generate_launch_description():
     return LaunchDescription([
         port_arg,
         ids_arg,
+        side_arg,
         Node(
             package='leap_hand',
             executable='leaphand_node.py',
