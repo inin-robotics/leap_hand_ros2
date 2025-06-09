@@ -67,11 +67,14 @@ class LeapNode(Node):
         # self.create_timer(0.1, self._pos_timer_callback)
 
     def _receive_pose(self, msg):
-        pose = np.zeros(16)
-        for name, position in zip(msg.name, msg.position):
-            if name.startswith('joint_'):
-                index = int(name.rsplit('_')[1])
-                pose[index] = position
+        # ! fixme: joint names should come from urdf
+        # pose = np.zeros(16)
+        # for name, position in zip(msg.name, msg.position):
+        #     if name.startswith('joint_'):
+        #         index = int(name.rsplit('_')[1])
+        #         pose[index] = position
+        pose = np.array(msg.position, dtype=np.float32)
+        assert len(pose) == 16, "Pose must have exactly 16 elements corresponding to the 16 joints of the LEAP hand."
         if self.input_format == 'allegro':
             # Allegro compatibility, first read the allegro publisher and then convert to leap
             # It adds 180 to the input to make the fully open position at 0 instead of 180.

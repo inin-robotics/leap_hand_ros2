@@ -363,6 +363,7 @@ class DynamixelClient:
                 else:
                     offset += np.pi / 2
             self._offsets[motor_id] = offset
+        # ! fixme: assembly error in inin lab leads to this crap
         if side == 1:
             for idx in [1, 5, 9]:
                 self._db_signs[idx] = -1.0
