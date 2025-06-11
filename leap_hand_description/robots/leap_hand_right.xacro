@@ -17,18 +17,18 @@
     <link name="${prefix}_base"/>
     <joint name="${prefix}_base_joint" type="fixed">
       <parent link="${prefix}_base"/>
-      <child link="${prefix}_palm_lower"/>
+      <child link="${prefix}_palm"/>
       <origin xyz="0.0 0.0 0.04" rpy="0 0 0"/>
     </joint>
 
-    <link name="${prefix}_palm_lower">
+    <link name="${prefix}_palm">
       <visual>
         <origin rpy="0.00000 -1.57079 0.00000" xyz="0.02370 0.06375 0.03800"/>
         <geometry>
           <mesh filename="package://${description_pkg}/meshes/visual/palm_lower.obj"/>
         </geometry>
       </visual>
-      <collision>     <!-- palm_lower -->
+      <collision>
         <origin rpy="0.00000 -1.57079 0.00000" xyz="-0.00000 0.04600 0.04900"/>
         <geometry>
           <box size="0.022 0.026 0.034"/>
@@ -259,7 +259,7 @@
       <child link="${prefix}_pip"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-1.047" upper="1.047"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_1" type="revolute">
       <origin rpy="1.57079 0.00000 0.00000" xyz="0.00770 0.06100 0.09100"/>
@@ -267,7 +267,7 @@
       <child link="${prefix}_mcp_joint"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.314" upper="2.23"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_2" type="revolute">
       <origin xyz="0.015 0.0143 -0.013" rpy="1.57079 -1.57079 0"/>
@@ -275,7 +275,7 @@
       <child link="${prefix}_dip"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.506" upper="1.885"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_3" type="revolute">
       <origin xyz="0 -0.0361 0.0002" rpy="0 0 0"/>
@@ -283,7 +283,7 @@
       <child link="${prefix}_fingertip"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.366" upper="2.042"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <link name="${prefix}_mcp_joint_2">
       <visual>
@@ -439,7 +439,7 @@
       <child link="${prefix}_pip_2"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-1.047" upper="1.047"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_5" type="revolute">
       <origin rpy="1.57079 0.00000 0.00000" xyz="0.00770 0.01560 0.09090"/>
@@ -447,7 +447,7 @@
       <child link="${prefix}_mcp_joint_2"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.314" upper="2.23"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_6" type="revolute">
       <origin xyz="0.015 0.0143 -0.013" rpy="1.57079 -1.57079 0"/>
@@ -455,7 +455,7 @@
       <child link="${prefix}_dip_2"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.506" upper="1.885"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_7" type="revolute">
       <origin xyz="0 -0.0361 0.0002" rpy="0 0 0"/>
@@ -463,7 +463,7 @@
       <child link="${prefix}_fingertip_2"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.366" upper="2.042"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <link name="${prefix}_mcp_joint_3">
       <visual>
@@ -619,7 +619,7 @@
       <child link="${prefix}_pip_3"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-1.047" upper="1.047"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_9" type="revolute">
       <origin rpy="1.57079 0.00000 0.00000" xyz="0.00770 -0.02980 0.09091"/>
@@ -627,7 +627,7 @@
       <child link="${prefix}_mcp_joint_3"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.314" upper="2.23"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_10" type="revolute">
       <origin xyz="0.015 0.0143 -0.013" rpy="1.57079 -1.57079 0"/>
@@ -635,7 +635,7 @@
       <child link="${prefix}_dip_3"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.506" upper="1.885"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_11" type="revolute">
       <origin xyz="0 -0.03609 0.0002" rpy="0 0 0"/>
@@ -643,7 +643,7 @@
       <child link="${prefix}_fingertip_3"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.366" upper="2.042"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <link name="${prefix}_thumb_temp_base">
       <visual>
@@ -781,7 +781,7 @@
       <child link="${prefix}_thumb_temp_base"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.349" upper="2.094"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_13" type="revolute">
       <origin xyz="0 0.0143 -0.013" rpy="1.57079 -1.57079 0"/>
@@ -789,7 +789,7 @@
       <child link="${prefix}_thumb_pip"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-0.47" upper="2.443"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_14" type="revolute">
       <origin xyz="0 0.0145 -0.017" rpy="-1.57079 0 0"/>
@@ -797,7 +797,7 @@
       <child link="${prefix}_thumb_dip"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-1.20" upper="1.90"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
     <joint name="${prefix}_15" type="revolute">
       <origin xyz="0 0.0466 0.0002" rpy="0 0 3.14159"/>
@@ -805,7 +805,7 @@
       <child link="${prefix}_thumb_fingertip"/>
       <axis xyz="0 0 -1"/>
       <limit effort="0.95" velocity="8.48" lower="-1.34" upper="1.88"/>
-      <joint_properties friction="0.0"/>
+      <dynamics friction="0.0"/>
     </joint>
 
     <!--  virtual auxiliary link-->
