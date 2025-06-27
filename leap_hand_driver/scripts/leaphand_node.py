@@ -37,7 +37,7 @@ class LeapNode(Node):
         
         # Subscribes to a variety of sources that can command the hand
         self.input_format = input_format
-        self.create_subscription(JointState, 'joints_target', self._receive_pose, 10)
+        self.create_subscription(JointState, 'joint_states', self._receive_pose, 10)
 
         # Creates services that can give information about the hand out
         self.create_service(LeapVelocity, 'leap_velocity', self.vel_srv)
@@ -63,28 +63,29 @@ class LeapNode(Node):
         self._dxl_client.write_desired_pos(self._motors, np.zeros(16))
 
         self._lock_client = threading.Lock()
-        self._pub_joints = self.create_publisher(JointState, 'joint_states', 10)
+        # self._pub_joints = self.create_publisher(JointState, 'joint_states', 10)
         # self.create_timer(0.1, self._pos_timer_callback)
 
-    def _receive_pose(self, msg):
-        # ! fixme: joint names should come from urdf
-        # pose = np.zeros(16)
-        # for name, position in zip(msg.name, msg.position):
-        #     if name.startswith('joint_'):
-        #         index = int(name.rsplit('_')[1])
-        #         pose[index] = position
-        pose = np.array(msg.position, dtype=np.float32)
-        assert len(pose) == 16, "Pose must have exactly 16 elements corresponding to the 16 joints of the LEAP hand."
-        if self.input_format == 'allegro':
-            # Allegro compatibility, first read the allegro publisher and then convert to leap
-            # It adds 180 to the input to make the fully open position at 0 instead of 180.
-            pose = lhu.LEAPhand_to_allegro(pose, zeros=False)
-        elif self.input_format == 'ones':
-            # Sim compatibility, first read the sim publisher and then convert to leap
-            # Sim compatibility for policies, it assumes the ranges are [-1,1] and then convert to leap hand ranges.
-            pose = lhu.LEAPhand_to_sim_ones(pose)
+    def _receive_pose(self, msg: JointState):
+        assert len(msg.position) == 16, "Pose must have exactly 16 elements corresponding to the 16 joints of the LEAP hand."
+        pos_names = []
+        for pos, name in zip(msg.position, msg.name):
+            pos_names.append((pos, name))
+        pos_names = sorted(pos_names, key=lambda x: int(x[1].rsplit("_", 1)[1]))
+        pos_sorted = []
+        for pos, _ in pos_names:
+            pos_sorted.append(pos)
+        pos_sorted = np.array(pos_sorted, dtype=np.float32)
+        # if self.input_format == 'allegro':
+        #     # Allegro compatibility, first read the allegro publisher and then convert to leap
+        #     # It adds 180 to the input to make the fully open position at 0 instead of 180.
+        #     pose = lhu.LEAPhand_to_allegro(pose, zeros=False)
+        # elif self.input_format == 'ones':
+        #     # Sim compatibility, first read the sim publisher and then convert to leap
+        #     # Sim compatibility for policies, it assumes the ranges are [-1,1] and then convert to leap hand ranges.
+        #     pose = lhu.LEAPhand_to_sim_ones(pose)
         with self._lock_client:
-            self._dxl_client.write_desired_pos(self._motors, pose)
+            self._dxl_client.write_desired_pos(self._motors, pos_sorted)
 
     def _pos_timer_callback(self):
         with self._lock_client:
