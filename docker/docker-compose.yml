@@ -1,0 +1,50 @@
+name: leap_hand_ros2
+services:
+  leap_hand_ros2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: "host"
+      args:
+        - https_proxy=${https_proxy}
+        - USER_UID=${USER_UID:?error}
+        - USER_GID=${USER_GID:?error}
+        - USERNAME=${USERNAME:?error}
+        - IDE_TYPE=${IDE_TYPE:?error}
+    container_name: leap_hand_ros2
+    network_mode: "host"
+    privileged: true
+    # compile after the container starts
+    command: >
+      bash -c "
+        source /opt/ros/humble/setup.bash &&
+        colcon build --symlink-install &&
+        if [ $$? -eq 0 ]; then
+          touch install/COLCON_SUCCESS;
+        else
+          touch install/COLCON_FAILED;
+        fi &&
+        tail -f /dev/null
+      "
+    tty: true
+    stdin_open: true
+    volumes:
+      - ../leap_hand_description:/home/${USERNAME}/ros2_ws/src/leap_hand_description
+      - ../leap_hand_driver:/home/${USERNAME}/ros2_ws/src/leap_hand_driver
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev:/dev
+      - cache-ide_server:/home/${USERNAME}/.vscode-server
+      - cache-ide_settings:/home/${USERNAME}/ros2_ws/.vscode
+    device_cgroup_rules:
+      - "c 5:* rwm"
+      - "c 188:* rwm"
+      - "c 254:* rwm"
+    environment:
+      QT_X11_NO_MITSHM: 1
+      DISPLAY: $DISPLAY
+      TERM: xterm-256color
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:?error}
+      ROS_LOCALHOST_ONLY: ${ROS_LOCALHOST_ONLY:?error}
+volumes:
+  cache-ide_server:
+  cache-ide_settings:

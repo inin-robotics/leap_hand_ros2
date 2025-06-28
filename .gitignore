@@ -1,2 +1,5 @@
-__pycache__/
 *.pyc
+docker/secrets/
+docker/*.env
+__pycache__/
+.vscode/
