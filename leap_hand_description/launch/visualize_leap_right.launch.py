@@ -1,25 +1,28 @@
-import os
+from pathlib import Path
 
+import xacro
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.conditions import IfCondition
-from launch.substitutions import Command, FindExecutable, LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    leap_xacro_file = os.path.join(
-        get_package_share_directory("leap_hand_description"),
-        "robots",
-        "leap_hand_right.urdf.xacro",
+    xacro_file_path = (
+        Path(get_package_share_directory("leap_hand_description"))
+        / "robots"
+        / "leap_hand_right.urdf.xacro"
     )
-    robot_description = Command([FindExecutable(name="xacro"), " ", leap_xacro_file])
+    if not xacro_file_path.exists():
+        raise FileNotFoundError(f"XACRO file not found:{xacro_file_path}")
 
-    rviz_file = os.path.join(
-        get_package_share_directory("leap_hand_description"),
-        "rviz",
-        "visualize_leap_right.rviz",
+    robot_description = xacro.process_file(
+        xacro_file_path.as_posix(), mappings={"connected_to": ""}
+    ).toxml()  # type: ignore
+
+    rviz_file_path = (
+        Path(get_package_share_directory("leap_hand_description"))
+        / "rviz"
+        / "visualize_leap_right.rviz"
     )
 
     return LaunchDescription(
@@ -38,7 +41,7 @@ def generate_launch_description():
                 package="rviz2",
                 executable="rviz2",
                 name="rviz2",
-                arguments=["--display-config", rviz_file],
+                arguments=["--display-config", rviz_file_path.as_posix()],
             ),
         ]
     )

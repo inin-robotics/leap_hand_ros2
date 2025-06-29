@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 
+import threading
+
 import numpy as np
 import rclpy
-import threading
+
+# import leap_hand_utils.leap_hand_utils as lhu
+# from leap_hand.src import LeapPosition
+from leap_hand.srv import LeapEffort, LeapPosVelEff, LeapVelocity
+from leap_hand_utils.dynamixel_client import DynamixelClient
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-from leap_hand_utils.dynamixel_client import DynamixelClient
-import leap_hand_utils.leap_hand_utils as lhu
-from leap_hand.srv import LeapPosition, LeapVelocity, LeapEffort, LeapPosVelEff
 
 #LEAP hand conventions:
 #180 is flat out home pose for the index, middle, ring, finger MCPs.
@@ -65,6 +68,7 @@ class LeapNode(Node):
         self._lock_client = threading.Lock()
         # self._pub_joints = self.create_publisher(JointState, 'joint_states', 10)
         # self.create_timer(0.1, self._pos_timer_callback)
+        self.get_logger().info("Iitialized finished.")
 
     def _receive_pose(self, msg: JointState):
         assert len(msg.position) == 16, "Pose must have exactly 16 elements corresponding to the 16 joints of the LEAP hand."

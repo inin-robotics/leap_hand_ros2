@@ -1,46 +1,103 @@
+from pathlib import Path
+
+import xacro
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch_ros.actions import Node
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
-from launch.actions import DeclareLaunchArgument
+from launch_ros.actions import Node
+
+PORT_NAME = "port"
+IDS_NAME = "ids"
+SIDE_NAME = "side"
+CONNECTED_TO = ""
+PUBLISH_DESCRIPTION_NAME = "publish_description"
+
+
+# OpaqueFunction 将调用的函数
+def launch_setup(context, *_, **__):
+    port = LaunchConfiguration(PORT_NAME).perform(context)
+    ids = LaunchConfiguration(IDS_NAME).perform(context)
+    side = LaunchConfiguration(SIDE_NAME).perform(context)
+    connected_to = LaunchConfiguration(CONNECTED_TO).perform(context)
+    publish_description = LaunchConfiguration(PUBLISH_DESCRIPTION_NAME).perform(context)
+
+    xacro_file_path = (
+        Path(get_package_share_directory("leap_hand_description"))
+        / "robots"
+        / f"leap_hand_{side}.urdf.xacro"
+    )
+
+    if not xacro_file_path.exists():
+        raise FileNotFoundError(f"XACRO file not found:{xacro_file_path}")
+
+    robot_description_raw = xacro.process_file(
+        xacro_file_path.as_posix(), mappings={CONNECTED_TO: connected_to}
+    ).toxml()  # type: ignore
+
+    nodes = []
+    if publish_description:
+        nodes.append(
+            Node(
+                package="robot_state_publisher",
+                executable="robot_state_publisher",
+                output="screen",
+                parameters=[{"robot_description": robot_description_raw}],
+            )
+        )
+    nodes.append(
+        Node(
+            package="leap_hand",
+            executable="leaphand_node.py",
+            name="leaphand_node",
+            emulate_tty=True,
+            output="screen",
+            parameters=[
+                {"kP": 800.0},
+                {"kI": 0.0},
+                {"kD": 200.0},
+                {"curr_lim": 500.0},
+                {"port": port},
+                {"ids": ids},
+                {"side": side},
+            ],
+        )
+    )
+
+    return nodes
+
 
 def generate_launch_description():
-    port_arg = DeclareLaunchArgument(
-        'port',
-        default_value='/dev/leap_left_hand',
-        description='Serial port for leaphand_node'
-    )
     default_id_str = ",".join(str(i) for i in range(16))
-    ids_arg = DeclareLaunchArgument(
-        'ids',
-        default_value=default_id_str,
-        description='Motor IDs for leaphand_node'
+
+    return LaunchDescription(
+        [
+            DeclareLaunchArgument(
+                PORT_NAME,
+                default_value="/dev/leap_left_hand",
+                description="Serial port for leaphand_node",
+            ),
+            DeclareLaunchArgument(
+                IDS_NAME,
+                default_value=default_id_str,
+                description="Motor IDs for leaphand_node",
+            ),
+            DeclareLaunchArgument(
+                SIDE_NAME,
+                default_value="left",
+                choices=["left", "right"],
+                description="Side of the hand (left or right)",
+            ),
+            DeclareLaunchArgument(
+                CONNECTED_TO,
+                default_value="",
+                description="The link name that LEAP Hand connected to (optional)",
+            ),
+            DeclareLaunchArgument(
+                PUBLISH_DESCRIPTION_NAME,
+                default_value="true",
+                description="Publish the robot description through topic.",
+            ),
+            OpaqueFunction(function=launch_setup),
+        ]
     )
-    side_arg = DeclareLaunchArgument(
-        'side',
-        default_value='left',
-        description='Side of the hand (left or right)'
-    )
-    port = LaunchConfiguration('port')
-    ids = LaunchConfiguration('ids')
-    side = LaunchConfiguration('side')
-    return LaunchDescription([
-        port_arg,
-        ids_arg,
-        side_arg,
-        Node(
-            package='leap_hand',
-            executable='leaphand_node.py',
-            name='leaphand_node',
-            emulate_tty=True,
-            output='screen',
-            parameters=[
-                {'kP': 800.0},
-                {'kI': 0.0},
-                {'kD': 200.0},
-                {'curr_lim': 500.0},
-                {'port': port},
-                {'ids': ids},
-                {'side': side},
-            ]
-        ),
-    ])

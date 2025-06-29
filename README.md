@@ -22,6 +22,10 @@
   ```
 4. 进入容器，通过`ros2 launch`启动单手或双手脚本，具体参数见launch文件。
 
+## Notes
+
+* 因为当前驱动不标准，没有从硬件取回关节角并发送到对应的joints states，所以单独启动驱动看rviz里边的东西是乱的，这个问题需要改善驱动才能解决。
+
 ## TODO
 
 - [ ] 当前的驱动和urdf实现功能少且不符合ROS2惯例，考虑使用[ros2control dynamixel](https://github.com/dynamixel-community/dynamixel_hardware)改写

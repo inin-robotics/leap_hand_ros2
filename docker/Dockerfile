@@ -45,6 +45,8 @@ RUN sudo apt-get update \
     && sudo apt-get install -y --no-install-recommends \
         python3-serial \
         ros-${ROS_DISTRO}-dynamixel-sdk \
+        ros-${ROS_DISTRO}-xacro \
+        ros-${ROS_DISTRO}-joint-state-publisher-gui \
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/*
 # add user to dialout group for serial port access
