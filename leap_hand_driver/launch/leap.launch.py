@@ -10,7 +10,6 @@ from launch_ros.actions import Node
 PORT_NAME = "port"
 IDS_NAME = "ids"
 SIDE_NAME = "side"
-CONNECTED_TO = ""
 PUBLISH_DESCRIPTION_NAME = "publish_description"
 
 
@@ -19,7 +18,6 @@ def launch_setup(context, *_, **__):
     port = LaunchConfiguration(PORT_NAME).perform(context)
     ids = LaunchConfiguration(IDS_NAME).perform(context)
     side = LaunchConfiguration(SIDE_NAME).perform(context)
-    connected_to = LaunchConfiguration(CONNECTED_TO).perform(context)
     publish_description = LaunchConfiguration(PUBLISH_DESCRIPTION_NAME).perform(context)
 
     xacro_file_path = (
@@ -32,8 +30,9 @@ def launch_setup(context, *_, **__):
         raise FileNotFoundError(f"XACRO file not found:{xacro_file_path}")
 
     robot_description_raw = xacro.process_file(
-        xacro_file_path.as_posix(), mappings={CONNECTED_TO: connected_to}
+        xacro_file_path.as_posix()
     ).toxml()  # type: ignore
+    namespace = "leap_hand_" + side
 
     nodes = []
     if publish_description:
@@ -41,6 +40,7 @@ def launch_setup(context, *_, **__):
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
+                namespace=namespace,
                 output="screen",
                 parameters=[{"robot_description": robot_description_raw}],
             )
@@ -50,6 +50,7 @@ def launch_setup(context, *_, **__):
             package="leap_hand",
             executable="leaphand_node.py",
             name="leaphand_node",
+            namespace=namespace,
             emulate_tty=True,
             output="screen",
             parameters=[
@@ -87,11 +88,6 @@ def generate_launch_description():
                 default_value="left",
                 choices=["left", "right"],
                 description="Side of the hand (left or right)",
-            ),
-            DeclareLaunchArgument(
-                CONNECTED_TO,
-                default_value="",
-                description="The link name that LEAP Hand connected to (optional)",
             ),
             DeclareLaunchArgument(
                 PUBLISH_DESCRIPTION_NAME,
